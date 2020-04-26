@@ -20,8 +20,8 @@ export class PostCreateComponent implements OnInit {
     if(form.invalid) {
       return;
     }
-    console.log(form);
     this.postService.addPost(form.value.title, form.value.content);
+    form.resetForm();
   }
 
 }
