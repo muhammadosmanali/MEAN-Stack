@@ -1,11 +1,23 @@
 const express = require("express");
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
+const Post = require('./models/post')
 
 const app = express();
 
+//Connected to mongodb database
+mongoose.connect("your connection string").then(() => {
+  console.log("connect to database");
+}).catch(() => {
+  console.log("Connection failed!")
+});
+
+//Parse data to json
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
+//Setting up CORS
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -19,31 +31,26 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.post("/api/posts", (req, res, next) => {
-  const post = req.body;
-  console.log(post);
+  const post = new Post({
+    title: req.body.title,
+    content: req.body.content
+  });
+  post.save();
   res.status(201).json({
     message: 'Post Added successfully'
   });
 });
 
 app.get("/api/posts", (req, res, next) => {
-  const posts = [
-    {
-      id: "sfd7ds68f",
-      title: "First serve post",
-      content: "This is coming from server.",
-    },
-    {
-      id: "dfdf68787",
-      title: "second serve post",
-      content: "This is coming from server!!",
-    },
-  ];
-  res.status(200).json({
-    message: "Post fetched successfully!!",
-    posts: posts,
+  Post.find().then(documents => {
+    res.status(200).json({
+      message: "Post fetched successfully!!",
+      posts: documents
+    });
   });
+
 });
 
 module.exports = app;
